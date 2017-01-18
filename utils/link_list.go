@@ -75,10 +75,12 @@ func (l *List) Add(value interface{}, index int) error {
 
 	if l.Len() == 0 || index == 0{
 		l.Prepend(value)
+		return nil
 	}
 
 	if l.Len() - 1 == index{
 		l.Append(value)
+		return nil
 	}
 
 	nextNode,_ := l.Get(index)

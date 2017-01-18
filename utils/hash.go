@@ -2,8 +2,6 @@ package utils
 
 import (
 	"errors"
-	"container/list"
-	"golang.org/x/tools/godoc/util"
 	"math"
 )
 
@@ -34,7 +32,7 @@ func (ht *HashTable) Get(key string) (interface{}, error) {
 	return item.value, err
 }
 
-func (ht *HashTable) Put(key, value string){
+func (ht *HashTable) Put(key string, value interface{}){
 	index := ht.position(key)
 
 	if ht.Table[index] == nil{

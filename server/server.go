@@ -3,7 +3,9 @@ package airdisk
 import (
 	"net/http"
 	"fmt"
+
 )
+
 
 func Run()  {
 	handler := http.NewServeMux()
@@ -14,5 +16,10 @@ func Run()  {
 	handler.Handle("/upgrade", UpgradeHandler())
 	handler.Handle("/control", ControlHandler())
 
+	//Config
+	handler.Handle("/config/upgrade", ConfigUpgHandler())
+	handler.Handle("/config/control", ConfigCtlHandler())
+
 	http.ListenAndServe(":9123", handler)
+
 }

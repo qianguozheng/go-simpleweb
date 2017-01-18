@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"encoding/json"
 	"net/http"
+	"github.com/timtadh/data-structures/types"
 )
 
 type Upgrade struct {
@@ -13,6 +14,7 @@ type Upgrade struct {
 }
 
 type Control struct {
+	Mac string `json:mac`
 	Switch string `json:switch`
 }
 
@@ -27,21 +29,31 @@ func UpgradeHandler() http.Handler{
 		r.ParseForm()
 		mac := r.Form.Get("mac")
 		fmt.Println("mac:", mac)
-		if mac == "12345678"{
-			upg := Upgrade{
-				Mac: "12345678",
-				Url: "http://127.0.0.1/test.bin",
-				Md5: "1234567890123456789012",
-			}
+		if Lupg != nil {
+			if Lupg.Has(types.String(mac)){
+				upg, err := Lupg.Get(types.String(mac))
+				if err != nil {
+					fmt.Println(err.Error())
+					return
+				}
 
-			data, err := json.Marshal(upg)
-			if err != nil{
-				fmt.Println("Marshal json failed", err.Error())
+				//if upg.(ConfigUpg) != nil {
+					upgrade := Upgrade{
+						Mac: upg.(ConfigUpg).cfg.Mac,
+						Url: upg.(ConfigUpg).cfg.Url,
+						Md5: upg.(ConfigUpg).cfg.Md5,
+					}
 
-				goto Failed
+					data, err := json.Marshal(upgrade)
+					if err != nil {
+						fmt.Println("Marshal json failed", err.Error())
+
+						goto Failed
+					}
+					w.Write(data)
+					return
+				//}
 			}
-			w.Write(data)
-			return
 		}
 
 		return
@@ -63,28 +75,39 @@ func ControlHandler() http.Handler{
 		mac := r.Form.Get("mac")
 		fmt.Println("mac:", mac)
 		//Check database to find the mac is set to open Control channel ?
-		if mac == "12345678" {
-			//type Control struct {
-			//	Switch string `json:switch`
-			//}
-			ctl := Control{Switch:"On"}
-			data, err := json.Marshal(ctl)
-			if err != nil{
-				fmt.Println("Control json format failed")
-				goto Failed
-			}
-			w.Write(data)
-			return
-		}
 
-		return
-		Failed:
-		msgstr := Error{msg:"Upgrade Handler Failed"}
-		msg, err := json.Marshal(msgstr)
-		if err != nil{
-			fmt.Println("err:", err.Error())
+		if Lcfg != nil {
+			if (Lcfg.Has(types.String(mac))){
+				cfg, err := Lcfg.Get(types.String(mac))
+
+				if err != nil {
+					fmt.Println("Error: ", err.Error())
+					return
+				}
+
+
+				ctl := Control{Switch:cfg.(ConfigCtl).cfg.Switch,
+						Mac:cfg.(ConfigCtl).cfg.Mac}
+				data, err := json.Marshal(ctl)
+				if err != nil {
+					fmt.Println("Control json format failed")
+					goto Failed
+				}
+				w.Write(data)
+				return
+
+			}
+
+
+			return
+			Failed:
+			msgstr := Error{msg:"Upgrade Handler Failed"}
+			msg, err := json.Marshal(msgstr)
+			if err != nil {
+				fmt.Println("err:", err.Error())
+			}
+			w.Write(msg)
 		}
-		w.Write(msg)
 	}
 	return http.HandlerFunc(fn)
 }

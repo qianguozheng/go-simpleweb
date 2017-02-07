@@ -3,10 +3,13 @@ package airdisk
 import (
 	"net/http"
 	"fmt"
-
+	//"../sqlite"
 )
 
 
+func DBInit(){
+	//sqlite.Connect()
+}
 func Run()  {
 	handler := http.NewServeMux()
 	handler.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request){
@@ -16,10 +19,10 @@ func Run()  {
 	handler.Handle("/upgrade", UpgradeHandler())
 	handler.Handle("/control", ControlHandler())
 
-	//Config
-	handler.Handle("/config/upgrade", ConfigUpgHandler())
-	handler.Handle("/config/control", ConfigCtlHandler())
+	////Config
+	//handler.Handle("/config/upgrade", ConfigUpgHandler())
+	//handler.Handle("/config/control", ConfigCtlHandler())
 
-	http.ListenAndServe(":9123", handler)
+	http.ListenAndServe(":80", handler)
 
 }

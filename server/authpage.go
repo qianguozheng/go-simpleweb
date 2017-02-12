@@ -142,6 +142,7 @@ var wechatPage = `
 	function callWechatBrowser(){
 		//Wechat_GotoRedirect('wxd86056fe58061437', 'demoNew', '1486903282625', '7de58b9792874463538fac948a23116a', '7743860', 'http://wifi.weixin.qq.com/assistant/wifigw/auth.xhtml?httpCode=200', 'aa:aa:aa:aa:aa:aa', '2099', 'ff:ff:ff:ff:ff:ff');
 		alert("This is Demo");
+		window.location="http://192.168.1.1:3990/logon";
 	}
 </script>
 

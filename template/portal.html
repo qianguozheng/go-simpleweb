@@ -1,38 +1,15 @@
-package airdisk
-
-import (
-	"net/http"
-	"fmt"
-)
-
-var indexHTML = `<html>
-<head>
-	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
-	<title>测试</title>
-</head>
-<body>
-	<form action="/page" method="post">
-		用户名：<br>
-		<input name="username" type="text"><br>
-		请输入文本：<br>
-		<textarea name="usertext"></textarea><br>
-		<input type="submit" value="提交">
-	</form>
-</body>
-</html>`
-
-var wechatPage = `
+{{define "WechatParam"}}
 <!DOCTYPE HTML>
 <html>
 <head lang="zh-CN">
-	<meta charset="UTF-8">
+    <meta charset="UTF-8">
     <title>微信连Wi-Fi</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="format-detection" content="telephone=no">
-	<script type="text/javascript">
+    <script type="text/javascript">
 		/**
 		 * 微信连Wi-Fi协议3.1供运营商portal呼起微信浏览器使用
 		 */
@@ -140,7 +117,8 @@ var wechatPage = `
 </body>
 <script type="text/javascript">
 	function callWechatBrowser(){
-		//Wechat_GotoRedirect('wxd86056fe58061437', 'demoNew', '1486903282625', '7de58b9792874463538fac948a23116a', '7743860', 'http://wifi.weixin.qq.com/assistant/wifigw/auth.xhtml?httpCode=200', 'aa:aa:aa:aa:aa:aa', '2099', 'ff:ff:ff:ff:ff:ff');
+	    //(appId, extend, timestamp, sign, shopId, authUrl, mac, ssid, bssid)
+		Wechat_GotoRedirect('{{.AppId}}', '{{.Extend}}', '{{.Timestamp}}', '{{.Sign}}', '{{.ShopId}}', '{{.AuthUrl}}', '{{.Mac}}', '{{.Ssid}}', '{{.Bssid}}');
 		alert("This is Demo");
 		window.location="http://192.168.1.1:3990/logon";
 	}
@@ -149,10 +127,7 @@ var wechatPage = `
 <script type="text/javascript">
 	document.addEventListener('visibilitychange', putNoResponse, false);
 </script>
-</html>`
 
-func index(w http.ResponseWriter, r *http.Request)  {
-	//fmt.Fprintf(w, indexHTML)
-	fmt.Fprintf(w, wechatPage)
-}
 
+</html>
+{{end}}

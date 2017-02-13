@@ -1,39 +1,42 @@
 package airdisk
 
 import (
-	"net/http"
-	"fmt"
-	//"../sqlite"
+	"html/template"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
+	"io"
 )
 
-
-func DBInit(){
-	//sqlite.Connect()
+type Template struct{
+	templates *template.Template
 }
-
-func StaticServer(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("content-type", "text/html")
-	staticHandler := http.FileServer(http.Dir("./template/"))
-	staticHandler.ServeHTTP(w, r)
-	return
+func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error{
+	return t.templates.ExecuteTemplate(w, name, data)
 }
-
 func Run()  {
-	handler := http.NewServeMux()
-	handler.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request){
-		fmt.Fprintln(w, "This is test request")
-	})
 
-	handler.Handle("/upgrade", UpgradeHandler())
-	handler.Handle("/control", ControlHandler())
+	t := &Template{
+		templates: template.Must(template.ParseGlob("template/*.html")),
+	}
 
-	handler.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-	//handler.HandleFunc("/", index)
-	handler.HandleFunc("/index.html", index)
-	////Config
-	//handler.Handle("/config/upgrade", ConfigUpgHandler())
-	//handler.Handle("/config/control", ConfigCtlHandler())
+	e := echo.New()
+	e.Renderer = t
+	e.Static("/static","static")
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: "time=${time_rfc3339}, method=${method}, uri=${uri}, status=${status}\n",
+	}))
 
-	http.ListenAndServe(":38001", handler)
+	portalCtx := NewPortalCtx()
 
+
+	//mgGroup := e.Group("")
+	//mgGroup.GET("/index.html", portalCtx.Portal)
+	//mgGroup.POST("/upgrade", portalCtx.Upgrade)
+	//mgGroup.POST("/config", portalCtx.Config)
+	e.GET("/", portalCtx.Portal)
+	e.GET("/index.html", portalCtx.Portal)
+	e.POST("/upgrade", portalCtx.Upgrade)
+	e.POST("/config", portalCtx.Config)
+
+	e.Logger.Fatal(e.Start(":38001"))
 }

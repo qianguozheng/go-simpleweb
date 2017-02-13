@@ -14,6 +14,7 @@ const (
 )
 
 type Upgrade struct {
+	Result string `json:result`
 	Mac string `json:mac`
 	Url string `json:url`
 	Md5 string `json:md5`
@@ -48,7 +49,18 @@ func DoJob(mac string, t int, w http.ResponseWriter)  {
 			err = rows.Scan(&Mac, &upgrade, &control)
 		}
 		checkErr(err)
-
+		if control == 1 {
+			stmt, err := db.Prepare("update airdisk set control where mac=?")
+			checkErr(err)
+			res, err := stmt.Exec(0, mac)
+			checkErr(err)
+			affect, err := res.RowsAffected()
+			checkErr(err)
+			//fmt.Println(affect)
+			if affect != 1 {
+				fmt.Println("Update failed", affect)
+			}
+		}
 		db.Close()
 		fmt.Println(mac, upgrade, control)
 
@@ -100,15 +112,28 @@ func DoJob(mac string, t int, w http.ResponseWriter)  {
 				err = rows.Scan(&url, &version, &md5, &Mac)
 			}
 			checkErr(err)
+
+			stmt, err := db.Prepare("update airdisk set upgrade where mac=?")
+			checkErr(err)
+			res, err := stmt.Exec(0, mac)
+			checkErr(err)
+			affect, err := res.RowsAffected()
+			checkErr(err)
+			//fmt.Println(affect)
+			if affect != 1 {
+				fmt.Println("Update failed", affect)
+			}
+
+			db.Close()
 			/***
 				Mac: client judge no wrong return
 				Url: firmware address
 				Md5: firmware md5
 				Ver: firmware version, compare with local version
 			 */
-			db.Close()
 
-			upgJson := Upgrade{Mac: Mac,Url: url, Ver:version, Md5: md5}
+
+			upgJson := Upgrade{Result: "OK",Mac: Mac,Url: url, Ver:version, Md5: md5}
 			upgSerilize, err := json.Marshal(upgJson)
 			if err != nil{
 				fmt.Println(err.Error())

@@ -36,7 +36,7 @@ func Run()  {
 	e.GET("/", portalCtx.Portal)
 	e.GET("/index.html", portalCtx.Portal)
 	e.POST("/upgrade", portalCtx.Upgrade)
-	e.POST("/config", portalCtx.Config)
+	e.POST("/control", portalCtx.Control)
 
 	e.Logger.Fatal(e.Start(":38001"))
 }

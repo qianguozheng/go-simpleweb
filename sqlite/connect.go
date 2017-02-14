@@ -4,8 +4,7 @@ import "database/sql"
 import (
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
-	"net/http"
-	"encoding/json"
+	"errors"
 )
 
 const (
@@ -29,17 +28,19 @@ type Error struct {
 	msg string `json:msg`
 }
 
-func DoJob(mac string, t int, w http.ResponseWriter)  {
+func DoJob(mac string, t int) (interface{}, error) {
+	db, err := sql.Open("sqlite3", "./airdisk.db")
+	if err != nil{
+		return nil, errors.New("Open database failed")
+	}
+
 	switch t {
 	case _Control:
-		db, err := sql.Open("sqlite3", "./airdisk.db")
-		checkErr(err)
-		//stmt, err := db.Prepare("SELECT * FROM airdisk where mac=?")
 		rows, err := db.Query(fmt.Sprintf("SELECT * FROM airdisk where mac=\"%s\"",mac))
 		//checkErr(err)
 		if err != nil{
 			fmt.Println(err.Error())
-			return
+			return nil, err
 		}
 
 		var Mac string
@@ -47,7 +48,10 @@ func DoJob(mac string, t int, w http.ResponseWriter)  {
 		if (rows.Next()) {
 			err = rows.Scan(&Mac, &upgrade, &control)
 		}
-		checkErr(err)
+		if err != nil{
+			fmt.Println(err.Error())
+			return nil, err
+		}
 
 		db.Close()
 		fmt.Println(mac, upgrade, control)
@@ -56,12 +60,13 @@ func DoJob(mac string, t int, w http.ResponseWriter)  {
 			// Do repponse control message
 
 			ctlJson := Control{Mac: mac, Switch:"on"}
-			ctlSerilize, err := json.Marshal(ctlJson)
-			if err != nil{
-				fmt.Println(err.Error())
-				return
-			}
-			w.Write(ctlSerilize)
+			//ctlSerilize, err := json.Marshal(ctlJson)
+			//if err != nil{
+			//	fmt.Println(err.Error())
+			//	return nil, err
+			//}
+			//return ctlSerilize, nil
+			return ctlJson, nil
 		}
 		break
 
@@ -75,14 +80,18 @@ func DoJob(mac string, t int, w http.ResponseWriter)  {
 		if err != nil{
 			fmt.Println(err.Error())
 			db.Close()
-			return
+			return nil, err
 		}
 		var Mac string
 		var upgrade, control int
 		if (rows.Next()){
 			err = rows.Scan(&Mac, &upgrade, &control)
 		}
-		checkErr(err)
+		if err != nil{
+			fmt.Println(err.Error())
+			db.Close()
+			return nil, err
+		}
 		fmt.Println(mac, upgrade, control)
 
 		if upgrade == 1 {
@@ -91,7 +100,7 @@ func DoJob(mac string, t int, w http.ResponseWriter)  {
 			if err != nil{
 				fmt.Println(err.Error())
 				db.Close()
-				return
+				return nil, err
 			}
 
 			var Mac, url, version, md5 string
@@ -99,7 +108,11 @@ func DoJob(mac string, t int, w http.ResponseWriter)  {
 			if (rows.Next()){
 				err = rows.Scan(&url, &version, &md5, &Mac)
 			}
-			checkErr(err)
+			if err != nil{
+				fmt.Println(err.Error())
+				db.Close()
+				return nil, err
+			}
 			/***
 				Mac: client judge no wrong return
 				Url: firmware address
@@ -109,18 +122,20 @@ func DoJob(mac string, t int, w http.ResponseWriter)  {
 			db.Close()
 
 			upgJson := Upgrade{Mac: Mac,Url: url, Ver:version, Md5: md5}
-			upgSerilize, err := json.Marshal(upgJson)
-			if err != nil{
-				fmt.Println(err.Error())
-				return
-			}
-			w.Write(upgSerilize)
+			//upgSerilize, err := json.Marshal(upgJson)
+			//if err != nil {
+			//	fmt.Println(err.Error())
+			//	return nil, err
+			//}
+			//return upgSerilize, nil
+			return upgJson, nil
 		} else {
 			db.Close()
+			return nil, nil
 		}
-
 		break
 	}
+	return nil, nil
 }
 
 func checkErr(err error)  {

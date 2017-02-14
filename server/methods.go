@@ -3,6 +3,8 @@ package airdisk
 import (
 	"github.com/labstack/echo"
 	"net/http"
+	"fmt"
+	"../sqlite"
 )
 
 type WechatParam struct {
@@ -20,6 +22,21 @@ type WechatParam struct {
 type PortalCtx struct {
 
 }
+
+// Unified Protocol
+
+type ControlReq struct {
+	Mac string `json:mac`
+}
+type UpgradeReq struct {
+	Mac string `json:mac`
+	Ver string `json:version`
+}
+
+const (
+	UPGRUDE = iota
+	CONTROL
+)
 
 func NewPortalCtx() *PortalCtx{
 	lc := PortalCtx{}
@@ -45,9 +62,34 @@ func (portalCtx *PortalCtx) Portal(c echo.Context) error{
 }
 
 func (portalCtx *PortalCtx) Upgrade(c echo.Context) error{
-	return c.String(http.StatusOK, "Hello Upgrade")
+	//return c.String(http.StatusOK, "Hello Upgrade")
+	body := new(UpgradeReq)
+	if err := c.Bind(body); err != nil{
+		return err
+	}
+	fmt.Println(body.Mac)
+	respJson, err := sqlite.DoJob(body.Mac, UPGRUDE)
+	if err != nil{
+		fmt.Println(err)
+	}
+
+	return c.JSON(http.StatusOK, respJson)
 }
 
-func (portalCtx *PortalCtx) Config(c echo.Context) error{
-	return c.String(http.StatusOK, "Hello Config")
+
+func (portalCtx *PortalCtx) Control(c echo.Context) error{
+
+	body := new(ControlReq)
+	if err := c.Bind(body); err != nil{
+		return err
+	}
+	fmt.Println(body.Mac)
+	respJson, err := sqlite.DoJob(body.Mac, CONTROL)
+	if err != nil{
+		fmt.Println(err)
+	}
+
+	return c.JSON(http.StatusOK, respJson)
+	//return c.String(http.StatusOK, "Hello Config")
+
 }

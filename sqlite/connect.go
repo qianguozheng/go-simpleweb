@@ -13,6 +13,7 @@ const (
 )
 
 type Upgrade struct {
+	Result string `json:result`
 	Mac string `json:mac`
 	Url string `json:url`
 	Md5 string `json:md5`
@@ -28,8 +29,24 @@ type Error struct {
 	msg string `json:msg`
 }
 
+//var db *sql.DB
+//
+//func init(){
+//
+//	db, err := sql.Open("sqlite3", "./airdisk.db")
+//	//defer db.Close()
+//
+//	if err != nil{
+//		//return nil, errors.New("Open database failed")
+//		fmt.Println("Open database failed", err.Error())
+//	}
+//	fmt.Println(db)
+//}
+
 func DoJob(mac string, t int) (interface{}, error) {
 	db, err := sql.Open("sqlite3", "./airdisk.db")
+	defer db.Close()
+
 	if err != nil{
 		return nil, errors.New("Open database failed")
 	}
@@ -38,6 +55,7 @@ func DoJob(mac string, t int) (interface{}, error) {
 	case _Control:
 		rows, err := db.Query(fmt.Sprintf("SELECT * FROM airdisk where mac=\"%s\"",mac))
 		//checkErr(err)
+		defer rows.Close()
 		if err != nil{
 			fmt.Println(err.Error())
 			return nil, err
@@ -48,12 +66,12 @@ func DoJob(mac string, t int) (interface{}, error) {
 		if (rows.Next()) {
 			err = rows.Scan(&Mac, &upgrade, &control)
 		}
+
 		if err != nil{
 			fmt.Println(err.Error())
 			return nil, err
 		}
 
-		db.Close()
 		fmt.Println(mac, upgrade, control)
 
 		if control == 1 {
@@ -71,15 +89,15 @@ func DoJob(mac string, t int) (interface{}, error) {
 		break
 
 	case _Upgrade:
-		db, err := sql.Open("sqlite3", "./airdisk.db")
-		checkErr(err)
+		//db, err := sql.Open("sqlite3", "./airdisk.db")
 		rows, err := db.Query(fmt.Sprintf("SELECT * FROM airdisk where mac=\"%s\"",mac))
 		//rows, err := db.Query("SELECT * FROM airdisk where mac=\"hello\"")
 		//rows, err := db.Query("SELECT * FROM airdisk")
 		//checkErr(err)
+		defer rows.Close()
 		if err != nil{
 			fmt.Println(err.Error())
-			db.Close()
+			//db.Close()
 			return nil, err
 		}
 		var Mac string
@@ -87,9 +105,10 @@ func DoJob(mac string, t int) (interface{}, error) {
 		if (rows.Next()){
 			err = rows.Scan(&Mac, &upgrade, &control)
 		}
+
 		if err != nil{
 			fmt.Println(err.Error())
-			db.Close()
+			//db.Close()
 			return nil, err
 		}
 		fmt.Println(mac, upgrade, control)
@@ -99,10 +118,10 @@ func DoJob(mac string, t int) (interface{}, error) {
 			rows, err := db.Query(fmt.Sprintf("SELECT * FROM upgrade where mac=\"%s\"",mac))
 			if err != nil{
 				fmt.Println(err.Error())
-				db.Close()
+				//db.Close()
 				return nil, err
 			}
-
+			defer rows.Close()
 			var Mac, url, version, md5 string
 
 			if (rows.Next()){
@@ -110,7 +129,7 @@ func DoJob(mac string, t int) (interface{}, error) {
 			}
 			if err != nil{
 				fmt.Println(err.Error())
-				db.Close()
+				//db.Close()
 				return nil, err
 			}
 			/***
@@ -119,9 +138,9 @@ func DoJob(mac string, t int) (interface{}, error) {
 				Md5: firmware md5
 				Ver: firmware version, compare with local version
 			 */
-			db.Close()
+			//db.Close()
 
-			upgJson := Upgrade{Mac: Mac,Url: url, Ver:version, Md5: md5}
+			upgJson := Upgrade{Result: "OK",Mac: Mac,Url: url, Ver:version, Md5: md5}
 			//upgSerilize, err := json.Marshal(upgJson)
 			//if err != nil {
 			//	fmt.Println(err.Error())
@@ -130,17 +149,10 @@ func DoJob(mac string, t int) (interface{}, error) {
 			//return upgSerilize, nil
 			return upgJson, nil
 		} else {
-			db.Close()
+			//db.Close()
 			return nil, nil
 		}
 		break
 	}
 	return nil, nil
-}
-
-func checkErr(err error)  {
-	if nil != err{
-		fmt.Println(err.Error())
-		//panic(err)
-	}
 }

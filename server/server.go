@@ -13,6 +13,11 @@ type Template struct{
 func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error{
 	return t.templates.ExecuteTemplate(w, name, data)
 }
+
+var (
+	Opts *Options
+)
+
 func Run()  {
 
 	t := &Template{
@@ -33,10 +38,13 @@ func Run()  {
 	//mgGroup.GET("/index.html", portalCtx.Portal)
 	//mgGroup.POST("/upgrade", portalCtx.Upgrade)
 	//mgGroup.POST("/config", portalCtx.Config)
+	//db := InitDB("./airdisk.db")
+	//defer db.Close()
+
 	e.GET("/", portalCtx.Portal)
 	e.GET("/index.html", portalCtx.Portal)
 	e.POST("/upgrade", portalCtx.Upgrade)
 	e.POST("/control", portalCtx.Control)
 
-	e.Logger.Fatal(e.Start(":38001"))
+	e.Logger.Fatal(e.Start(Opts.Port))
 }

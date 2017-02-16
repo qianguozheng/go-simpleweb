@@ -4,7 +4,7 @@ import (
 	"github.com/labstack/echo"
 	"net/http"
 	"fmt"
-	"../sqlite"
+	"../models"
 )
 
 type WechatParam struct {
@@ -68,7 +68,7 @@ func (portalCtx *PortalCtx) Upgrade(c echo.Context) error{
 		return err
 	}
 	fmt.Println(body.Mac)
-	respJson, err := sqlite.DoJob(body.Mac, UPGRUDE)
+	respJson, err := models.DoJob(body.Mac, UPGRUDE)
 	if err != nil{
 		fmt.Println(err)
 	}
@@ -84,7 +84,7 @@ func (portalCtx *PortalCtx) Control(c echo.Context) error{
 		return err
 	}
 	fmt.Println(body.Mac)
-	respJson, err := sqlite.DoJob(body.Mac, CONTROL)
+	respJson, err := models.DoJob(body.Mac, CONTROL)
 	if err != nil{
 		fmt.Println(err)
 	}

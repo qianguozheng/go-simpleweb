@@ -1,10 +1,11 @@
-package sqlite
+package models
 
-import "database/sql"
 import (
+	"database/sql"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
-	"errors"
+	"log"
+	"sync"
 )
 
 const (
@@ -29,35 +30,57 @@ type Error struct {
 	msg string `json:msg`
 }
 
-//var db *sql.DB
-//
-//func init(){
-//
-//	db, err := sql.Open("sqlite3", "./airdisk.db")
-//	//defer db.Close()
-//
-//	if err != nil{
-//		//return nil, errors.New("Open database failed")
-//		fmt.Println("Open database failed", err.Error())
-//	}
-//	fmt.Println(db)
-//}
 
-func DoJob(mac string, t int) (interface{}, error) {
-	db, err := sql.Open("sqlite3", "./airdisk.db")
-	defer db.Close()
+var db *sql.DB
+var m *sync.Mutex
+func InitDB(path string) {
+	var err error
+	db, err = sql.Open("sqlite3", path)
+	//defer db.Close()
 
 	if err != nil{
-		return nil, errors.New("Open database failed")
+		//return nil, errors.New("Open database failed")
+		fmt.Println("Open database failed", err.Error())
 	}
 
+	if err = db.Ping(); err != nil {
+		log.Panic(err)
+	}
+	fmt.Println("Database open success")
+
+	m = new(sync.Mutex)
+
+}
+
+func disableUpgrade(mac string){
+	m.Lock()
+	_, err :=db.Exec("update airdisk set upgrade=0 where mac=$1", mac)
+	m.Unlock()
+	if err != nil{
+		log.Println(err.Error())
+	}
+}
+func disableControl(mac string)  {
+	m.Lock()
+	_, err := db.Exec("update airdisk set control=0 where mac=$1", mac)
+	m.Unlock()
+	if err != nil{
+		log.Println(err.Error())
+	}
+}
+func DoJob(mac string, t int) (interface{}, error) {
+	//db, err := sql.Open("sqlite3", "./airdisk.db")
+	//defer db.Close()
+	//
+	//if err != nil{
+	//	return nil, errors.New("Open database failed")
+	//}
 	switch t {
 	case _Control:
 		rows, err := db.Query(fmt.Sprintf("SELECT * FROM airdisk where mac=\"%s\"",mac))
-		//checkErr(err)
-		defer rows.Close()
+
 		if err != nil{
-			fmt.Println(err.Error())
+			log.Println(err.Error())
 			return nil, err
 		}
 
@@ -66,59 +89,48 @@ func DoJob(mac string, t int) (interface{}, error) {
 		if (rows.Next()) {
 			err = rows.Scan(&Mac, &upgrade, &control)
 		}
-
+		rows.Close()
 		if err != nil{
-			fmt.Println(err.Error())
+			log.Println(err.Error())
 			return nil, err
 		}
 
-		fmt.Println(mac, upgrade, control)
+		log.Println(mac, upgrade, control)
 
 		if control == 1 {
 			// Do repponse control message
-
+			defer disableControl(mac)
 			ctlJson := Control{Mac: mac, Switch:"on"}
-			//ctlSerilize, err := json.Marshal(ctlJson)
-			//if err != nil{
-			//	fmt.Println(err.Error())
-			//	return nil, err
-			//}
-			//return ctlSerilize, nil
 			return ctlJson, nil
 		}
 		break
 
 	case _Upgrade:
-		//db, err := sql.Open("sqlite3", "./airdisk.db")
 		rows, err := db.Query(fmt.Sprintf("SELECT * FROM airdisk where mac=\"%s\"",mac))
-		//rows, err := db.Query("SELECT * FROM airdisk where mac=\"hello\"")
-		//rows, err := db.Query("SELECT * FROM airdisk")
-		//checkErr(err)
-		defer rows.Close()
+
 		if err != nil{
-			fmt.Println(err.Error())
-			//db.Close()
+			log.Println(err.Error())
 			return nil, err
 		}
+
 		var Mac string
 		var upgrade, control int
 		if (rows.Next()){
 			err = rows.Scan(&Mac, &upgrade, &control)
 		}
-
+		rows.Close()
 		if err != nil{
-			fmt.Println(err.Error())
-			//db.Close()
+			log.Println(err.Error())
 			return nil, err
 		}
-		fmt.Println(mac, upgrade, control)
+		log.Println(mac, upgrade, control)
 
 		if upgrade == 1 {
 			//Do upgrade process, return data
+			defer disableUpgrade(mac)
 			rows, err := db.Query(fmt.Sprintf("SELECT * FROM upgrade where mac=\"%s\"",mac))
 			if err != nil{
-				fmt.Println(err.Error())
-				//db.Close()
+				log.Println(err.Error())
 				return nil, err
 			}
 			defer rows.Close()
@@ -128,8 +140,7 @@ func DoJob(mac string, t int) (interface{}, error) {
 				err = rows.Scan(&url, &version, &md5, &Mac)
 			}
 			if err != nil{
-				fmt.Println(err.Error())
-				//db.Close()
+				log.Println(err.Error())
 				return nil, err
 			}
 			/***
@@ -138,18 +149,11 @@ func DoJob(mac string, t int) (interface{}, error) {
 				Md5: firmware md5
 				Ver: firmware version, compare with local version
 			 */
-			//db.Close()
 
 			upgJson := Upgrade{Result: "OK",Mac: Mac,Url: url, Ver:version, Md5: md5}
-			//upgSerilize, err := json.Marshal(upgJson)
-			//if err != nil {
-			//	fmt.Println(err.Error())
-			//	return nil, err
-			//}
-			//return upgSerilize, nil
+
 			return upgJson, nil
 		} else {
-			//db.Close()
 			return nil, nil
 		}
 		break

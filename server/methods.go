@@ -71,13 +71,13 @@ func makeSign(t int64) string {
 	//	[]byte(SecretKey))
 	io.WriteString(md5Ctx, strings.Join(str,""))
 	cipherStr := md5Ctx.Sum(nil)
-	return fmt.Sprintf("%s", cipherStr)
+	return fmt.Sprintf("%x", cipherStr)
 }
 
 func (portalCtx *PortalCtx) Portal(c echo.Context) error{
 	//c.SetHandler(UpgradeHandler)
 	//return c.String(http.StatusOK, "Hello Portal")
-	t := time.Second*1000
+	t := time.Now().Second()*1000
 	wechatParam := WechatParam{
 		AppId: AppId,
 		Extend: "Extend",

@@ -109,14 +109,14 @@
             xmlhttp.send();
 
             xmlhttp.onreadystatechange = function(){
-                if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+                if (xmlhttp.readyState == 4)
                 {
                     Wechat_GotoRedirect('{{.AppId}}', '{{.Extend}}', '{{.Timestamp}}', '{{.Sign}}', '{{.ShopId}}', '{{.AuthUrl}}', '{{.Mac}}', '{{.Ssid}}', '{{.Bssid}}');
                 }
                 else
                 {
                     alert("failed");
-                    alert(xmlhttp.readState);
+                    alert(xmlhttp.readyState);
                     alert(xmlhttp.status)
                 }
             }

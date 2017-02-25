@@ -45,6 +45,7 @@ func Run()  {
 	e.GET("/index.html", portalCtx.Portal)
 	e.POST("/upgrade", portalCtx.Upgrade)
 	e.POST("/control", portalCtx.Control)
+	e.GET("/auth", portalCtx.Auth)
 
 	e.Logger.Fatal(e.Start(Opts.Port))
 }

@@ -7,6 +7,9 @@ type Options struct {
 	Port string
 	Logto string
 	Loglevel string
+	AppId string
+	AppSecret string
+	SecretKey string
 }
 
 func ParseArgs() *Options{
@@ -14,6 +17,10 @@ func ParseArgs() *Options{
 	port := flag.String("port", ":38001", "Assign port used to serve")
 	logto := flag.String("log","stdout", "Write log messages to this file.")
 	loglevel := flag.String("log-level", "DEBUG", "The level of messages to log. one of: DEBUG, INFO, WARNING, ERROR")
+	appId := flag.String("appid", "wx0bc5ea9ffc61b2dg", "The wechat AppId")
+	appSecret := flag.String("appsecret","2c0f03863a6eca71c7f9218916bcb238", "The wechat AppSecret")
+	secretKey := flag.String("secretkey","685aec96360b737c175b13343cc53388","The wechat secretKey")
+
 
 	flag.Parse()
 	return &Options{
@@ -21,5 +28,8 @@ func ParseArgs() *Options{
 		Port : *port,
 		Logto: *logto,
 		Loglevel: *loglevel,
+		AppId: *appId,
+		AppSecret: *appSecret,
+		SecretKey: *secretKey,
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"crypto/md5"
 	"io"
 	"strings"
+	"strconv"
 )
 
 type WechatParam struct {
@@ -28,7 +29,7 @@ const (
 	//Extend
 	ShopId = 4177281
 	AuthUrl = "http://hiweeds.net:38001/auth"
-	SecretKey = ""
+	//SecretKey = "685aec96360b737c175b13343cc53388"
 
 )
 type PortalCtx struct {
@@ -58,7 +59,7 @@ func NewPortalCtx() *PortalCtx{
 
 func makeSign(t int64) string {
 	md5Ctx := md5.New()
-	str :=[]string{AppId,"Extend",string(int64(t)),string(ShopId), AuthUrl, "00:0C:43:E1:76:2A",
+	str :=[]string{AppId,"Extend",fmt.Sprintf("%d", t),strconv.Itoa(ShopId), AuthUrl, "00:0C:43:E1:76:2A",
 		"-Subway", "84:5D:D7:E1:76:28", SecretKey}
 
 	//md5Ctx.Write([]byte(AppId)+[]byte("Extend")+
@@ -69,6 +70,8 @@ func makeSign(t int64) string {
 	//	[]byte("-Subway")+
 	//	[]byte("84:5D:D7:E1:76:28")+
 	//	[]byte(SecretKey))
+	ss := strings.Join(str, "")
+	fmt.Println(ss)
 	io.WriteString(md5Ctx, strings.Join(str,""))
 	cipherStr := md5Ctx.Sum(nil)
 	return fmt.Sprintf("%x", cipherStr)
@@ -77,13 +80,13 @@ func makeSign(t int64) string {
 func (portalCtx *PortalCtx) Portal(c echo.Context) error{
 	//c.SetHandler(UpgradeHandler)
 	//return c.String(http.StatusOK, "Hello Portal")
-	t := time.Now().Second()*1000
+	t := time.Now().UnixNano() / 1000000
 	wechatParam := WechatParam{
 		AppId: AppId,
 		Extend: "Extend",
-		Timestamp: string(int64(t)), //毫秒
+		Timestamp: fmt.Sprintf("%d", int64(t)), //毫秒
 		Sign: makeSign(int64(t)),
-		ShopId: string(ShopId),
+		ShopId: strconv.Itoa(ShopId),
 		AuthUrl: AuthUrl,
 		Mac: "00:0C:43:E1:76:2A",  //不确定是哪个mac地址？
 		Ssid: "-Subway",

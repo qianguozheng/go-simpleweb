@@ -9,9 +9,10 @@ import (
 	"errors"
 )
 
-const (
-	AppId=""
-	AppSecret=""
+var (
+	AppId string
+	AppSecret string
+	SecretKey string
 )
 
 type AccessToken struct {

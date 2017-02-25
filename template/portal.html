@@ -95,6 +95,33 @@
 			script.setAttribute('src', url);
 			document.getElementsByTagName('head')[0].appendChild(script);
 		}
+		function ajax(url){
+		    var xmlhttp;
+		    if (window.XMLHttpRequest){
+		        xmlhttp = new XMLHttpRequest();
+		    }
+		    else
+		    {
+		        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+		    }
+
+            xmlhttp.open("GET", url, true);
+            xmlhttp.send();
+
+            xmlhttp.onreadystatechange = function(){
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+                {
+                    Wechat_GotoRedirect('{{.AppId}}', '{{.Extend}}', '{{.Timestamp}}', '{{.Sign}}', '{{.ShopId}}', '{{.AuthUrl}}', '{{.Mac}}', '{{.Ssid}}', '{{.Bssid}}');
+                }
+                else
+                {
+                    alert("failed");
+                    alert(xmlhttp.readState);
+                    alert(xmlhttp.status)
+                }
+            }
+
+		}
 	</script>
     <link rel="stylesheet" href="static/css/style-simple-follow.css"/>
 </head>
@@ -118,9 +145,11 @@
 <script type="text/javascript">
 	function callWechatBrowser(){
 	    //(appId, extend, timestamp, sign, shopId, authUrl, mac, ssid, bssid)
+
 		//Wechat_GotoRedirect('{{.AppId}}', '{{.Extend}}', '{{.Timestamp}}', '{{.Sign}}', '{{.ShopId}}', '{{.AuthUrl}}', '{{.Mac}}', '{{.Ssid}}', '{{.Bssid}}');
-		alert("This is Demo");
-		window.location="http://192.168.1.1:3990/logon";
+		ajax("http://192.168.1.1:3990/logon");
+		//alert("This is Demo");
+		//window.location="http://192.168.1.1:3990/logon";
 	}
 </script>
 

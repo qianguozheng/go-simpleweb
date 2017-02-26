@@ -83,7 +83,7 @@ func (portalCtx *PortalCtx) Portal(c echo.Context) error{
 
 	//ShopId, SSID 从公众号获取 关联起来。
 	shopId := models.GetShopId(ssid)
-
+	fmt.Println("shopId=", shopId)
 
 	t := time.Now().UnixNano() / 1000000
 	wechatParam := WechatParam{

@@ -43,7 +43,7 @@
 		//注册回调函数
 		function jsonpCallback(result){
 			if(result && result.success){
-			    //alert('WeChat will call up : ' + result.success + '  data:' + result.data);
+			    alert('WeChat will call up : ' + result.success + '  data:' + result.data);
 			    var ua=navigator.userAgent;
 				if (ua.indexOf("iPhone") != -1 ||ua.indexOf("iPod")!=-1||ua.indexOf("iPad") != -1) {   //iPhone
 					document.location = result.data;
@@ -105,20 +105,19 @@
 		        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
 		    }
 
-            xmlhttp.open("GET", url, false);
+            xmlhttp.open("GET", url, true);
             xmlhttp.send();
-
             xmlhttp.onreadystatechange = function(){
                 if (xmlhttp.readyState == 4)
                 {
-                    //alert("got response")
+                    //alert("got response");
                     Wechat_GotoRedirect('{{.AppId}}', '{{.Extend}}', '{{.Timestamp}}', '{{.Sign}}', '{{.ShopId}}', '{{.AuthUrl}}', '{{.Mac}}', '{{.Ssid}}', '{{.Bssid}}');
                 }
                 else
                 {
                     alert("failed");
                     alert(xmlhttp.readyState);
-                    alert(xmlhttp.status)
+                    alert(xmlhttp.status);
                 }
             }
 
@@ -148,7 +147,7 @@
 	    //(appId, extend, timestamp, sign, shopId, authUrl, mac, ssid, bssid)
 
 		//Wechat_GotoRedirect('{{.AppId}}', '{{.Extend}}', '{{.Timestamp}}', '{{.Sign}}', '{{.ShopId}}', '{{.AuthUrl}}', '{{.Mac}}', '{{.Ssid}}', '{{.Bssid}}');
-		ajax("http://192.168.1.1:3990/logon");
+        ajax("http://192.168.1.1:3990/logon");
 		//alert("This is Demo");
 		//window.location="http://192.168.1.1:3990/logon";
 	}

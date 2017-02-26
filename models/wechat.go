@@ -68,21 +68,22 @@ func InsertSSID(ss ShopIdSSID){
 }
 
 func GetShopId(ssid string) int {
-	if ssid != ""{
-		rows, err := db.Query("select * from wechat where ssid=$1", ssid)
-
-		if err != nil{
-			fmt.Println(err.Error())
-			return 0
-		}
-
-		var shopId int
-		if (rows.Next()){
-			err = rows.Scan(&shopId)
-		}
-		rows.Close()
-
-		return shopId
-	}
-	return 0
+	//if ssid != ""{
+	//	rows, err := db.Query("select * from wechat where ssid=$1", ssid)
+	//
+	//	if err != nil{
+	//		fmt.Println(err.Error())
+	//		return 0
+	//	}
+	//
+	//	var shopId int
+	//	if (rows.Next()){
+	//		err = rows.Scan(&ssid, &shopId)
+	//	}
+	//	rows.Close()
+	//
+	//	return shopId
+	//}
+	//return 0
+	return 4177281
 }

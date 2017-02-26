@@ -57,10 +57,10 @@ func NewPortalCtx() *PortalCtx{
 	return &lc
 }
 
-func makeSign(t int64) string {
+func makeSign(t int64, ssid, bssid, mac string, shopid int) string {
 	md5Ctx := md5.New()
-	str :=[]string{AppId,"Extend",fmt.Sprintf("%d", t),strconv.Itoa(ShopId), AuthUrl, "00:0C:43:E1:76:2A",
-		"-Subway", "84:5D:D7:E1:76:28", SecretKey}
+	str :=[]string{AppId,"Extend",fmt.Sprintf("%d", t),strconv.Itoa(shopid), AuthUrl, mac,
+		ssid, bssid, SecretKey}
 
 	ss := strings.Join(str, "")
 	fmt.Println(ss)
@@ -83,14 +83,14 @@ func (portalCtx *PortalCtx) Portal(c echo.Context) error{
 
 	//ShopId, SSID 从公众号获取 关联起来。
 	shopId := models.GetShopId(ssid)
-
+	fmt.Println("shopId=", shopId)
 
 	t := time.Now().UnixNano() / 1000000
 	wechatParam := WechatParam{
 		AppId: AppId,
 		Extend: "Extend",
 		Timestamp: fmt.Sprintf("%d", int64(t)), //毫秒
-		Sign: makeSign(int64(t)),
+		Sign: makeSign(int64(t), ssid, bssid, wanmac, shopId),
 		ShopId: strconv.Itoa(shopId), //strconv.Itoa(ShopId),
 		AuthUrl: AuthUrl,
 		Mac: wanmac, //"00:0C:43:E1:76:2A",  //不确定是哪个mac地址？

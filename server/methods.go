@@ -71,13 +71,18 @@ func makeSign(t int64) string {
 
 func (portalCtx *PortalCtx) Portal(c echo.Context) error{
 
-	//wanmac := c.QueryParam("mac")
-	//bssid := c.QueryParam("bssid")
-	//usermac := c.QueryParam("user_mac")
-
+	wanmac := c.QueryParam("wanmac")
+	bssid := c.QueryParam("bssid")
+	usermac := c.QueryParam("usermac")
+	ssid := c.QueryParam("ssid")
+	fmt.Println("wanmac=", wanmac)
+	fmt.Println("ssid=", ssid)
+	fmt.Println("bssid=", bssid)
+	fmt.Println("usermac=", usermac)
 	//url解码也许
 
-	//填入如下参数
+	//ShopId, SSID 从公众号获取 关联起来。
+	shopId := models.GetShopId(ssid)
 
 
 	t := time.Now().UnixNano() / 1000000
@@ -86,11 +91,11 @@ func (portalCtx *PortalCtx) Portal(c echo.Context) error{
 		Extend: "Extend",
 		Timestamp: fmt.Sprintf("%d", int64(t)), //毫秒
 		Sign: makeSign(int64(t)),
-		ShopId: strconv.Itoa(ShopId),
+		ShopId: strconv.Itoa(shopId), //strconv.Itoa(ShopId),
 		AuthUrl: AuthUrl,
-		Mac: "00:0C:43:E1:76:2A",  //不确定是哪个mac地址？
-		Ssid: "-Subway",
-		Bssid: "84:5D:D7:E1:76:28",
+		Mac: wanmac, //"00:0C:43:E1:76:2A",  //不确定是哪个mac地址？
+		Ssid: ssid, //"-Subway",
+		Bssid: bssid, //"84:5D:D7:E1:76:28",
 	}
 	return c.Render(http.StatusOK, "WechatParam", wechatParam)
 }

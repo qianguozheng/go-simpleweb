@@ -11,7 +11,7 @@ func startTimer(f func())  {
 			now:= time.Now()
 			//计算下一个零点
 			next := now.Add(time.Hour *2)
-			next = time.Date(next.Year(),next.Month(),next.Day(), 0, 0, 0, 0,
+			next = time.Date(next.Year(),next.Month(),next.Day(), next.Hour(), next.Minute(), next.Second(), 0,
 				next.Location())
 			t := time.NewTicker(next.Sub(now))
 			<- t.C

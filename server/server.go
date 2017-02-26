@@ -51,5 +51,7 @@ func Run()  {
 	e.POST("/control", portalCtx.Control)
 	e.GET("/auth", portalCtx.Auth)
 
+	startTimer(Routines)
+
 	e.Logger.Fatal(e.Start(Opts.Port))
 }

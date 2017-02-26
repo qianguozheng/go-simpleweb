@@ -7,6 +7,8 @@ import (
 	"strings"
 	"io/ioutil"
 	"errors"
+	"github.com/bitly/go-simplejson"
+	"../models"
 )
 
 var (
@@ -113,8 +115,26 @@ type PageList struct {
 	PageIndex int `json:"pageindex"`
 	PageSize int `json:"pagesize"`
 }
+type PageDataRecords struct {
+	ShopId int `json:"shop_id"`
+	ShopName string `json:"shop_name"`
+	Ssid string `json:"ssid"`
+	ProtocolType int `json:"protocol_type"`
+	Sid string `json:"sid"`
+}
+type PageData struct {
+	TotalCount int `json:"totalcount"`
+	PageIndex int `json:"pageindex"`
+	PageCount int `json:"pagecount"`
+	Records PageDataRecords `json:"records"`
+}
+type PageResp struct {
+	ErrCode int `json:"errcode"`
+	Data PageData `json:"data"`
+}
 
-func GetShopList() (int, error){
+
+func GetShopList() ([]models.ShopIdSSID, error){
 	//https://api.weixin.qq.com/bizwifi/shop/list?access_token=ACCESS_TOKEN
 	url := fmt.Sprintf("https://api.weixin.qq.com/bizwifi/shop/list?access_token=%s", accesstoken)
 	postData, err := json.Marshal(PageList{PageIndex:1, PageSize:10})
@@ -123,19 +143,52 @@ func GetShopList() (int, error){
 
 	if err != nil{
 		fmt.Println("Http post failed", err.Error())
-		return -1, errors.New("Http post failed")
+		return nil, errors.New("Http post failed")
 	}
 	defer resp.Body.Close()
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil{
 		fmt.Println("Http post read response failed")
-		return -2, errors.New("http post read response failed")
+		return nil, errors.New("http post read response failed")
 	}
 
 	fmt.Println(string(data))
-	return 0, nil
+
+
+	var ss []models.ShopIdSSID
+	cJson,_ := simplejson.NewJson(data)
+	record,_:= cJson.Get("data").Get("records").Array()
+	for _, i := range record{
+		newRecord, _ := i.(map[string]interface{})
+		shopId := newRecord["shop_id"]
+		shopName := newRecord["shop_name"]
+		ssid := newRecord["ssid"]
+		sid := newRecord["sid"]
+
+		fmt.Println("shopid=", shopId)
+		fmt.Println("shopName=", shopName)
+		fmt.Println("ssid=", ssid)
+		fmt.Println("sid=", sid)
+
+		var tmpSs models.ShopIdSSID
+		tmpSs.Ssid = ssid.(string)
+		x,_ := shopId.(json.Number).Int64()
+		tmpSs.ShopId = int(x)
+
+		ss = append(ss, tmpSs)
+	}
+
+	//fmt.Println("sss=", ss)
+	//
+	//for _, v:= range ss{
+	//	fmt.Println(v.Ssid)
+	//	fmt.Println(v.ShopId)
+	//}
+
+	return ss, nil
 }
+
 
 type Shop struct {
 	ShopId int `json:"shop_id"`
@@ -173,3 +226,29 @@ func GetShopWiFiInfo(shopId int)  {
 //	GetShopList()
 //	GetShopWiFiInfo(4177281)
 //}
+
+
+/// Currently, It just update the token peridicoly
+/// 两个小时更新一次token值
+var at *AccessToken
+func Routines(){
+	var err error
+	at, err = GetAccessToken()
+	if err != nil{
+		fmt.Println("Get AccessToken failed")
+		return
+	}
+
+	fmt.Println("Expire:", at.Expires_In, "AccessToken:", at.AccessToken)
+	accesstoken = at.AccessToken
+	shopSsid, _ := GetShopList()
+
+	for _, v := range shopSsid{
+		//ssid := v.Ssid
+		//shopId := v.ShopId
+
+		if (false == models.CheckExistence(v)){
+			models.InsertSSID(v)
+		}
+	}
+}

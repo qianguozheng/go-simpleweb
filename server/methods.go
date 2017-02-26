@@ -62,14 +62,6 @@ func makeSign(t int64) string {
 	str :=[]string{AppId,"Extend",fmt.Sprintf("%d", t),strconv.Itoa(ShopId), AuthUrl, "00:0C:43:E1:76:2A",
 		"-Subway", "84:5D:D7:E1:76:28", SecretKey}
 
-	//md5Ctx.Write([]byte(AppId)+[]byte("Extend")+
-	//	[]byte(t)+
-	//	[]byte(ShopId)+
-	//	[]byte(AuthUrl)+
-	//	[]byte("00:0C:43:E1:76:2A")+
-	//	[]byte("-Subway")+
-	//	[]byte("84:5D:D7:E1:76:28")+
-	//	[]byte(SecretKey))
 	ss := strings.Join(str, "")
 	fmt.Println(ss)
 	io.WriteString(md5Ctx, strings.Join(str,""))
@@ -78,8 +70,16 @@ func makeSign(t int64) string {
 }
 
 func (portalCtx *PortalCtx) Portal(c echo.Context) error{
-	//c.SetHandler(UpgradeHandler)
-	//return c.String(http.StatusOK, "Hello Portal")
+
+	//wanmac := c.QueryParam("mac")
+	//bssid := c.QueryParam("bssid")
+	//usermac := c.QueryParam("user_mac")
+
+	//url解码也许
+
+	//填入如下参数
+
+
 	t := time.Now().UnixNano() / 1000000
 	wechatParam := WechatParam{
 		AppId: AppId,

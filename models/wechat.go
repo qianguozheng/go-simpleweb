@@ -61,31 +61,31 @@ func CheckExistence(ss ShopIdSSID) bool {
 }
 
 func InsertSSID(ss ShopIdSSID){
-	_, err := db.Exec("insert into wechat (shopid, ssid) values ($1, $2)", ss.Ssid, ss.ShopId)
+	_, err := db.Exec("insert into wechat (shopid, ssid) values ($1, $2)", ss.ShopId, ss.Ssid)
 	if err != nil{
 		fmt.Println(err.Error())
 	}
 }
 
 func GetShopId(ssid string) int {
-	//if ssid != ""{
-	//	rows, err := db.Query("select * from wechat where ssid=$1", ssid)
-	//
-	//	if err != nil{
-	//		fmt.Println(err.Error())
-	//		return 0
-	//	}
-	//
-	//	var shopId int
-	//	if (rows.Next()){
-	//		err = rows.Scan(&ssid, &shopId)
-	//	}
-	//	rows.Close()
-	//
-	//	return shopId
-	//}
-	//return 0
-	return 4177281
+	if ssid != "" {
+		rows, err := db.Query("select * from wechat where ssid=$1", ssid)
+
+		if err != nil {
+			fmt.Println(err.Error())
+			return 0
+		}
+
+		var shopId int
+		if (rows.Next()){
+			err = rows.Scan(&shopId, &ssid)
+		}
+		rows.Close()
+		fmt.Println("GetShopId: get shopid=", shopId)
+		return shopId
+	}
+	return 0
+	//return 4177281
 }
 
 type Subscribe struct {

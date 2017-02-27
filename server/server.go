@@ -51,6 +51,7 @@ func Run()  {
 	e.POST("/control", portalCtx.Control)
 	e.GET("/auth", portalCtx.Auth)
 
+	e.POST("/wechat/verify", portalCtx.Subscribe)
 	startTimer(Routines)
 
 	e.Logger.Fatal(e.Start(Opts.Port))

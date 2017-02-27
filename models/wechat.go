@@ -87,3 +87,12 @@ func GetShopId(ssid string) int {
 	//return 0
 	return 4177281
 }
+
+type Subscribe struct {
+	Mac string `json:"mac"`
+	UserMac string `json:"usermac"`
+}
+
+type SubscribeResponse struct {
+	Result string `json:"result"`
+}

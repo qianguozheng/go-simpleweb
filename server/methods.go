@@ -133,6 +133,29 @@ func (portalCtx *PortalCtx) Control(c echo.Context) error{
 
 }
 
+// Processing subscribe interface
+func (portalCtx *PortalCtx) Subscribe(c echo.Context) error{
+	//return c.String(http.StatusOK, "Hello Upgrade")
+	body := new(models.Subscribe)
+	if err := c.Bind(body); err != nil{
+		return err
+	}
+	fmt.Println("mac=", body.Mac)
+	fmt.Println("usermac=", body.UserMac)
+	//respJson, err := models.DoJob(body.Mac, UPGRUDE)
+	// 检查数据库中是否存在对应的用户mac对应的openId, 单个公众帐号如何与openId绑定？
+	// 思路： 根据路由器mac地址， 找到公众帐号，然后判断对应的公众帐号是否存在对应的openId.
+
+	//if err != nil{
+	//	fmt.Println(err)
+	//}
+	//var resp models.SubscribeResponse
+	resp := models.SubscribeResponse{Result:"Fail"}
+	var i interface{}
+	i = resp
+
+	return c.JSON(http.StatusOK, i)
+}
 
 func (portalCtx *PortalCtx) Auth(c echo.Context) error{
 	extend := c.QueryParam("extend")

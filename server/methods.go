@@ -22,6 +22,8 @@ type WechatParam struct {
 	Mac string
 	Ssid string
 	Bssid string
+	GwIP string
+	GwPort string
 }
 
 const (
@@ -75,10 +77,16 @@ func (portalCtx *PortalCtx) Portal(c echo.Context) error{
 	bssid := c.QueryParam("bssid")
 	usermac := c.QueryParam("usermac")
 	ssid := c.QueryParam("ssid")
+	gwport := c.QueryParam("gwport")
+	gwip := c.QueryParam("gwip")
+
 	fmt.Println("wanmac=", wanmac)
 	fmt.Println("ssid=", ssid)
 	fmt.Println("bssid=", bssid)
 	fmt.Println("usermac=", usermac)
+	fmt.Println("gwip=", gwip)
+	fmt.Println("gwport=", gwport)
+
 	//url解码也许
 
 	//ShopId, SSID 从公众号获取 关联起来。
@@ -96,6 +104,8 @@ func (portalCtx *PortalCtx) Portal(c echo.Context) error{
 		Mac: wanmac, //"00:0C:43:E1:76:2A",  //不确定是哪个mac地址？
 		Ssid: ssid, //"-Subway",
 		Bssid: bssid, //"84:5D:D7:E1:76:28",
+		GwIP: gwip,
+		GwPort: gwport,
 	}
 	return c.Render(http.StatusOK, "WechatParam", wechatParam)
 }

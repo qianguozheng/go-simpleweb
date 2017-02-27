@@ -147,9 +147,9 @@
 	    //(appId, extend, timestamp, sign, shopId, authUrl, mac, ssid, bssid)
 
 		//Wechat_GotoRedirect('{{.AppId}}', '{{.Extend}}', '{{.Timestamp}}', '{{.Sign}}', '{{.ShopId}}', '{{.AuthUrl}}', '{{.Mac}}', '{{.Ssid}}', '{{.Bssid}}');
-        ajax("http://192.168.1.1:3990/logon");
+        ajax("http://{{.GwIP}}:{{.GwPort}}/logon");
 		//alert("This is Demo");
-		//window.location="http://192.168.1.1:3990/logon";
+		//window.location="http://{{.GwIP}}:{{.GwPort}}/logon";
 	}
 </script>
 

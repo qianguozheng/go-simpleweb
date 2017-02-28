@@ -2,6 +2,7 @@ package airdisk
 
 import (
 	"time"
+	"os"
 )
 
 func startTimer(f func())  {
@@ -19,4 +20,8 @@ func startTimer(f func())  {
 	}()
 }
 
+func Exist(filename string) bool {
+	_, err := os.Stat(filename)
+	return err == nil || os.IsExist(err)
+}
 

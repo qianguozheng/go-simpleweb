@@ -19,11 +19,6 @@ var (
 )
 
 func Run()  {
-
-	AppId = Opts.AppId
-	AppSecret = Opts.AppSecret
-	SecretKey = Opts.SecretKey
-
 	t := &Template{
 		templates: template.Must(template.ParseGlob("template/*.html")),
 	}

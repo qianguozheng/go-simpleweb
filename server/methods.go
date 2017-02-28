@@ -59,9 +59,9 @@ func NewPortalCtx() *PortalCtx{
 	return &lc
 }
 
-func makeSign(t int64, ssid, bssid, mac string, shopid int) string {
+func makeSign(t int64, ssid, bssid, mac, ext string, shopid int) string {
 	md5Ctx := md5.New()
-	str :=[]string{AppId,"Extend",fmt.Sprintf("%d", t),strconv.Itoa(shopid), AuthUrl, mac,
+	str :=[]string{AppId,ext,fmt.Sprintf("%d", t),strconv.Itoa(shopid), AuthUrl, mac,
 		ssid, bssid, SecretKey}
 
 	ss := strings.Join(str, "")
@@ -92,13 +92,13 @@ func (portalCtx *PortalCtx) Portal(c echo.Context) error{
 	//ShopId, SSID 从公众号获取 关联起来。
 	shopId := models.GetShopId(ssid)
 	fmt.Println("shopId=", shopId)
-
+	ext := fmt.Sprintf("%s", strings.Join([]string{wanmac,usermac},"|"))
 	t := time.Now().UnixNano() / 1000000
 	wechatParam := WechatParam{
 		AppId: AppId,
-		Extend: "Extend",
+		Extend: ext,
 		Timestamp: fmt.Sprintf("%d", int64(t)), //毫秒
-		Sign: makeSign(int64(t), ssid, bssid, wanmac, shopId),
+		Sign: makeSign(int64(t), ssid, bssid, wanmac, ext, shopId),
 		ShopId: strconv.Itoa(shopId), //strconv.Itoa(ShopId),
 		AuthUrl: AuthUrl,
 		Mac: wanmac, //"00:0C:43:E1:76:2A",  //不确定是哪个mac地址？
@@ -167,14 +167,22 @@ func (portalCtx *PortalCtx) Subscribe(c echo.Context) error{
 	return c.JSON(http.StatusOK, i)
 }
 
+// 接受微信服务器发送过来的请求，认证通过
 func (portalCtx *PortalCtx) Auth(c echo.Context) error{
 	extend := c.QueryParam("extend")
 	openId := c.QueryParam("openId")
 	tid := c.QueryParam("tid")
 
-	fmt.Println("Extend=", extend)
+	fmt.Println("Extend=", extend) //wanmac|usermac
 	fmt.Println("OpenId=", openId)
 	fmt.Println("Tid=", tid)
+
+	arr := strings.Split(extend, "|")
+	fmt.Println(arr)
+
+	//存储openid, mac, router-mac
+	user := models.UserInfo{WanMac:arr[0], UserMac:arr[1], OpenId:openId, WechatNo:""}
+	models.StoreUserInfo(user)
 
 	return c.String(http.StatusOK, "")
 	//return c.String(http.StatusOK, "Hello Config")

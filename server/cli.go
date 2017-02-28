@@ -1,5 +1,8 @@
 package airdisk
-import "flag"
+
+import (
+	"flag"
+)
 
 
 type Options struct {
@@ -10,6 +13,8 @@ type Options struct {
 	AppId string
 	AppSecret string
 	SecretKey string
+	Token string
+	Config string
 }
 
 func ParseArgs() *Options{
@@ -20,8 +25,8 @@ func ParseArgs() *Options{
 	appId := flag.String("appid", "wx0bc5ea9ffc61b2dg", "The wechat AppId")
 	appSecret := flag.String("appsecret","2c0f03863a6eca71c7f9218916bcb238", "The wechat AppSecret")
 	secretKey := flag.String("secretkey","685aec96360b737c175b13343cc53388","The wechat secretKey")
-
-
+	token := flag.String("token", "12345678901234567890qwertyuioqgz", "The wechat server token")
+	config := flag.String("config", "config.json", "Config file containing parameters needed")
 	flag.Parse()
 	return &Options{
 		Database: *database,
@@ -31,5 +36,7 @@ func ParseArgs() *Options{
 		AppId: *appId,
 		AppSecret: *appSecret,
 		SecretKey: *secretKey,
+		Token: *token,
+		Config: *config,
 	}
 }

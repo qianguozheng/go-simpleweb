@@ -231,6 +231,8 @@ func GetShopWiFiInfo(shopId int)  {
 /// Currently, It just update the token peridicoly
 /// 两个小时更新一次token值
 var at *AccessToken
+
+//TODO: secret key need to be update by different SSID/ShopId
 func Routines(){
 	var err error
 	at, err = GetAccessToken()

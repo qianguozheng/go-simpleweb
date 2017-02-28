@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"github.com/google/martian/log"
 )
 
 // RouterMac | shopid | openid |
@@ -95,4 +96,32 @@ type Subscribe struct {
 
 type SubscribeResponse struct {
 	Result string `json:"result"`
+}
+
+type UserInfo struct {
+	OpenId string
+	UserMac string
+	WanMac string
+	WechatNo string
+}
+func StoreUserInfo(user UserInfo) {
+	_, err :=db.Exec("insert into userinfo(wanmac, usermac, opeind) values( $1, $2, $3)", user.WanMac,
+		user.WanMac, user.OpenId)
+	if err != nil{
+		log.Errorf("store user info failed, err", err.Error())
+	}
+}
+
+func RemoveUserInfo(openId, wechatNo string)  {
+	_, err := db.Exec("delete from userinfo where openid=$1 and wechatNo=$2", openId, wechatNo)
+	if err != nil{
+		log.Errorf("remove user info failed, err", err.Error())
+	}
+}
+
+func AddWechatNo2UserInfo(openId, wechatNo string){
+	_, err := db.Exec("insert into userinfo (wechatno) values ($1) where openid=$2", wechatNo, openId)
+	if err != nil{
+		log.Errorf("add wechatno into user info failed, err", err.Error())
+	}
 }

@@ -6,6 +6,8 @@ import "./models"
 import (
 	"./regserver"
 	"github.com/goless/config"
+	"./binhtml"
+
 )
 
 func main()  {
@@ -33,7 +35,8 @@ func main()  {
 	fmt.Println("Airdisk server started:", airdisk.Opts.Database, airdisk.Opts.Port,
 			airdisk.Opts.Logto, airdisk.Opts.Loglevel)
 
+	bt := binhtml.New(binhtml.Asset, binhtml.AssetDir)
 	go regserver.Run()
-	airdisk.Run()
+	airdisk.Run(bt)
 	fmt.Println("Airdisk exit")
 }

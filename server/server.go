@@ -5,6 +5,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"io"
+	"../binhtml"
 )
 
 type Template struct{
@@ -18,9 +19,15 @@ var (
 	Opts *Options
 )
 
-func Run()  {
+func Run(bt *binhtml.BinTemplate)  {
+
+	AppId = Opts.AppId
+	AppSecret = Opts.AppSecret
+	SecretKey = Opts.SecretKey
+
 	t := &Template{
-		templates: template.Must(template.ParseGlob("template/*.html")),
+		//templates: template.Must(template.ParseGlob("template/*.html")),
+		templates: template.Must(bt.LoadDirectory("template")),
 	}
 
 	e := echo.New()
@@ -46,7 +53,6 @@ func Run()  {
 	e.POST("/control", portalCtx.Control)
 	e.GET("/auth", portalCtx.Auth)
 
-	e.POST("/wechat/verify", portalCtx.Subscribe)
 	startTimer(Routines)
 
 	e.Logger.Fatal(e.Start(Opts.Port))

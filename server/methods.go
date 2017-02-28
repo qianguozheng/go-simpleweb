@@ -155,12 +155,13 @@ func (portalCtx *PortalCtx) Subscribe(c echo.Context) error{
 	//respJson, err := models.DoJob(body.Mac, UPGRUDE)
 	// 检查数据库中是否存在对应的用户mac对应的openId, 单个公众帐号如何与openId绑定？
 	// 思路： 根据路由器mac地址， 找到公众帐号，然后判断对应的公众帐号是否存在对应的openId.
+	var result string
+	result = "false"
+	if models.CheckUserInfo(body.UserMac, body.Mac){
+		result = "true"
+	}
 
-	//if err != nil{
-	//	fmt.Println(err)
-	//}
-	//var resp models.SubscribeResponse
-	resp := models.SubscribeResponse{Result:"Fail"}
+	resp := models.SubscribeResponse{Result:result}
 	var i interface{}
 	i = resp
 
@@ -179,6 +180,8 @@ func (portalCtx *PortalCtx) Auth(c echo.Context) error{
 
 	arr := strings.Split(extend, "|")
 	fmt.Println(arr)
+	fmt.Println(arr[0])
+	fmt.Println(arr[1])
 
 	//存储openid, mac, router-mac
 	user := models.UserInfo{WanMac:arr[0], UserMac:arr[1], OpenId:openId, WechatNo:""}

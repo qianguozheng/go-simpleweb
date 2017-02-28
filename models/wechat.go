@@ -105,8 +105,8 @@ type UserInfo struct {
 	WechatNo string
 }
 func StoreUserInfo(user UserInfo) {
-	_, err :=db.Exec("insert into userinfo(wanmac, usermac, opeind) values( $1, $2, $3)", user.WanMac,
-		user.WanMac, user.OpenId)
+	_, err :=db.Exec("insert into userinfo(wanmac, usermac, openid) values( $1, $2, $3)", user.WanMac,
+		user.UserMac, user.OpenId)
 	if err != nil{
 		log.Errorf("store user info failed, err", err.Error())
 	}
@@ -120,8 +120,31 @@ func RemoveUserInfo(openId, wechatNo string)  {
 }
 
 func AddWechatNo2UserInfo(openId, wechatNo string){
-	_, err := db.Exec("insert into userinfo (wechatno) values ($1) where openid=$2", wechatNo, openId)
+	_, err := db.Exec("update userinfo set wechatno=$1 where openid=$2", wechatNo, openId)
 	if err != nil{
 		log.Errorf("add wechatno into user info failed, err", err.Error())
 	}
+}
+
+func CheckUserInfo(usermac, wanmac string) bool{
+	rows, err := db.Query("select * from userinfo where usermac=$1 and wanmac=$2", usermac, wanmac)
+
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
+
+	var openId, wechatNo string
+	if (rows.Next()){
+		err = rows.Scan(&wanmac, &usermac, &openId, &wechatNo)
+		if err != nil{
+			return false
+		}
+	}
+	rows.Close()
+	if openId != "" && wechatNo !=""{
+		fmt.Println("openId=", openId)
+		return true
+	}
+	return false
 }

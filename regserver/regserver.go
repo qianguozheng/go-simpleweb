@@ -108,10 +108,10 @@ func (wx WeChatCtx) HandlePost(c echo.Context) error {
 	fmt.Println("Event=", body.Event)
 
 	switch  {
-	case strings.HasPrefix(body.MsgType, "unsubscribe"):
+	case strings.HasPrefix(body.Event, "unsubscribe"):
 	//更新数据库，删除未订阅事件
 		models.RemoveUserInfo(body.FromUserName, body.ToUserName)
-	case strings.HasPrefix(body.MsgType, "subscribe"):
+	case strings.HasPrefix(body.Event, "subscribe"):
 		models.AddWechatNo2UserInfo(body.FromUserName, body.ToUserName)
 	default:
 		fmt.Println("Not known")
